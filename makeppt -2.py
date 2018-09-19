@@ -1,71 +1,77 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+#%matplotlib inline
 from pptx import Presentation
 from pptx.util import Inches
 import os
-def addBulletSlide(ppt_name = None):
-    if ppt_name:
-        ppt_name = ppt_name + '.pptx'
-    prs = Presentation(ppt_name)
+def addBulletSlide(ppt_name):
+    try:
+        prs = Presentation(ppt_name + '.pptx')
+    except:
+        prs = Presentation()
+    
     heading = input('Please Enter heading of Bullet Slide:-- ')
-    first_text = input('Please Enter line in heading:-- ')
-    bullet_line = input('Please Enter bullet line:-- ')
     bullet_slide_layout = prs.slide_layouts[1]
     slide = prs.slides.add_slide(bullet_slide_layout)
     shapes = slide.shapes
     title_shape = shapes.title
     body_shape = shapes.placeholders[1]
     title_shape.text = heading
-    tf = body_shape.text_frame
-    tf.text = first_text
-    p = tf.add_paragraph()
-    p.text = bullet_line
-    p.level = 1
-    p = tf.add_paragraph()
-    p.text = ''
-    p.level = 2
-    return prs
+    dct = dict(zip((1, 2, 3, 4, 5, 6, 7, 8, 9, 10), 
+                   ('1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th')))
+    count = 1
+    while True:
+        first_text = input(f'Want to add {dct.get(count)} heading Please enter:--(if not type quit):-- ')
+        if first_text.lower() != 'quit' and first_text.lower() != 'break':
+            tf = body_shape.text_frame
+            tf.text = first_text
+            tf.lvel = 1
+            count1 = 1
+            while True:
+                bullet_line = input(f'Want to add {dct.get(count1)} Subheading Please enter:--(if not type quit):-- ')
+                if bullet_line.lower() != 'quit' and bullet_line.lower() != 'break':
+                    p = tf.add_paragraph()
+                    p.text = bullet_line
+                    p.level = 1
+                    count1 += 1
+                    continue
+                break
+            count += 1
+            continue
+        break
+    prs.save(ppt_name + '.pptx')
+                
 
-def addImageSlide(img_path, ppt_name = None):
-    if ppt_name:
-        ppt_name = ppt_name + '.pptx'
-    prs = Presentation(ppt_name)
+def addImageSlide(img_path, ppt_name):
+    try:
+        prs = Presentation(ppt_name + '.pptx')
+    except:
+        prs = Presentation()
     blank_slide_layout = prs.slide_layouts[6]
     slide = prs.slides.add_slide(blank_slide_layout)
     left =Inches(1.6)
     top = Inches(1)
     pic = slide.shapes.add_picture(img_path, left, top)
-    return prs
+    prs.save(ppt_name + '.pptx')
+    os.remove(img_path)
 
 def createppt(ppt_name, *args):
     #1 create text slide
     x = None
-    decision = input('Want to add bullet slide:-- ')
-    if decision == 'yes' or decision == 'Yes':
+    d = input('Want to add bullet slide:--(y / n) ')
+    if d.lower() == 'y' or d.lower() == 'yes':
         x = 1
     else:
         x = None
     if x:
-        try:
-            prs = Presentation(ppt_name + '.pptx')
-            prs = addBulletSlide(ppt_name)
-            prs.save(ppt_name + '.pptx')
-        except:
-            prs = addBulletSlide()
-            prs.save(ppt_name + '.pptx')
+        addBulletSlide(ppt_name)
 
     #2 create image slide
     for i in args:
-        img_path = str(i) + '.png'
-        try:
-            prs = Presentation(ppt_name + '.pptx')
-            prs = addImageSlide(img_path, ppt_name)
-            prs.save(ppt_name + '.pptx')
-            os.remove(img_path)
-        except:
-            prs = addImageSlide(img_path)
-            prs.save(ppt_name + '.pptx')
-            os.remove(img_path)
+        img_path = i + '.png'
+        addImageSlide(img_path, ppt_name)
             
-
 def makeppt(file_name, ppt_name):
     import matplotlib.pyplot as plt
     #%matplotlib inline
@@ -85,7 +91,7 @@ def makeppt(file_name, ppt_name):
     plt.title('X vs Y dashed line plot ')
     plt.xlabel('x ---------------->')
     plt.ylabel('y ---------------->')
-    plt.plot(x, y, color='green', marker='o', linestyle='dashed',
+    f = plt.plot(x, y, color='green', marker='o', linestyle='dashed',
         linewidth=2, markersize=12)
     plt.grid()
     plt.savefig('plot.png', dpi = 100, pad_inches = 0.3)
@@ -98,6 +104,7 @@ def makeppt(file_name, ppt_name):
     plt.savefig('scatter.png', dpi = 100, pad_inches = 0.3)
     plt.close()
     return createppt(ppt_name, 'plot', 'scatter')
+
 file_name = input('Enter the name of text file:-- ')
 if '.txt' in file_name:
     file_name = file_name
